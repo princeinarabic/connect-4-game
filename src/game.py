@@ -61,11 +61,14 @@ class Game:
 
 
 BLUE = (0,0,255)
-BLACK = (0,0,0)
+WHITE = (255,255,255)
 RED = (255,0,0)
 YELLOW = (255,255,0)
+PANTONE = (102, 157, 179)
+
 SQUARESIZE = 100
 RADIUS = int(SQUARESIZE / 2 - 5)
+
 
 
 class View:
@@ -85,19 +88,33 @@ class View:
 			for r in range(ROW_COUNT):
 				pygame.draw.rect(self.screen, BLUE, 
 								(c * SQUARESIZE, r * SQUARESIZE + SQUARESIZE, SQUARESIZE, SQUARESIZE))
-				pygame.draw.circle(self.screen, BLACK, (int(c * SQUARESIZE + SQUARESIZE / 2), 
-														int(r * SQUARESIZE + SQUARESIZE + SQUARESIZE / 2)), RADIUS)
+
+				pygame.draw.circle(self.screen, WHITE, (int(c * SQUARESIZE + SQUARESIZE / 2), 
+								   int(r * SQUARESIZE + SQUARESIZE + SQUARESIZE / 2)), RADIUS)
 	
 		for c in range(COLUMN_COUNT):
 			for r in range(ROW_COUNT):		
 				if self.game.board[r][c] == 1:
 					pygame.draw.circle(self.screen, RED, (int(c * SQUARESIZE+SQUARESIZE / 2), 
 											self.height - int(r * SQUARESIZE+SQUARESIZE / 2)), RADIUS)
+
 				elif self.game.board[r][c] == 2: 
 					pygame.draw.circle(self.screen, YELLOW, (int(c * SQUARESIZE + SQUARESIZE / 2), 
 											self.height - int(r * SQUARESIZE + SQUARESIZE / 2)), RADIUS)
 
 		pygame.display.update()
+
+
+	def win_or_draw(self, player):
+		if self.game.win(player):
+			label = self.game_font.render(f'Player {player} wins!', 1, PANTONE)
+			self.screen.blit(label, (40,10))
+			self.game_over = True
+
+		if self.game.moves == 42:
+			label = self.game_font.render("Draw!", 1, PANTONE)
+			self.screen.blit(label, (40,10))
+			self.game_over = True
 
 	
 	def player_input(self, event, player):
@@ -108,16 +125,7 @@ class View:
 			row = self.game.next_valid_row(col)
 			self.game.move(row, col)
 
-			if self.game.win(player):
-				label = self.game_font.render(f'Player {player} wins!', 1, RED)
-				self.screen.blit(label, (40,10))
-				self.game_over = True
-
-			if self.game.moves == 42:
-				label = self.game_font.render("Draw!", 1, RED)
-				self.screen.blit(label, (40,10))
-			
-				self.game_over = True
+			self.win_or_draw(player)
 		
 
 	def play_game(self):
@@ -133,7 +141,7 @@ class View:
 
 				if event.type == pygame.MOUSEMOTION:
 
-					pygame.draw.rect(self.screen, BLACK, (0,0, self.width, SQUARESIZE))
+					pygame.draw.rect(self.screen, WHITE, (0,0, self.width, SQUARESIZE))
 					posx = event.pos[0]
 					if self.game.turn == 1:
 						pygame.draw.circle(self.screen, RED, (posx, int(SQUARESIZE / 2)), RADIUS)
@@ -144,7 +152,7 @@ class View:
 
 				if event.type == pygame.MOUSEBUTTONDOWN:
 
-					pygame.draw.rect(self.screen, BLACK, (0, 0, self.width, SQUARESIZE))
+					pygame.draw.rect(self.screen, WHITE, (0, 0, self.width, SQUARESIZE))
 					# Player 1 Input
 					if self.game.turn == 1:
 						self.player_input(event, 1)
